@@ -1,0 +1,1341 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>datastructures: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">datastructures/array.go (85.1%)</option>
+				
+				<option value="file1">datastructures/chain_hash_table.go (86.8%)</option>
+				
+				<option value="file2">datastructures/forward_list.go (94.7%)</option>
+				
+				<option value="file3">datastructures/main.go (0.0%)</option>
+				
+				<option value="file4">datastructures/queue.go (86.8%)</option>
+				
+				<option value="file5">datastructures/red_black_tree.go (89.4%)</option>
+				
+				<option value="file6">datastructures/stack.go (87.4%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "bufio"
+        "encoding/binary"
+        "encoding/json"
+        "fmt"
+        "io"
+        "strconv"
+        "strings"
+)
+
+type Array struct {
+        data     []string
+        size     int
+        capacity int
+}
+
+func NewArray(capacity int) *Array <span class="cov8" title="1">{
+        if capacity &lt;= 0 </span><span class="cov0" title="0">{
+                capacity = 10
+        }</span>
+        <span class="cov8" title="1">return &amp;Array{
+                data:     make([]string, capacity),
+                size:     0,
+                capacity: capacity,
+        }</span>
+}
+
+func (a *Array) Insert(index int, value string) error <span class="cov8" title="1">{
+        if index &lt; 0 || index &gt; a.size </span><span class="cov8" title="1">{
+                return fmt.Errorf("index out of range")
+        }</span>
+        <span class="cov8" title="1">if a.size &gt;= a.capacity </span><span class="cov8" title="1">{
+                return fmt.Errorf("array is full")
+        }</span>
+        
+        <span class="cov8" title="1">for i := a.size; i &gt; index; i-- </span><span class="cov8" title="1">{
+                a.data[i] = a.data[i-1]
+        }</span>
+        <span class="cov8" title="1">a.data[index] = value
+        a.size++
+        return nil</span>
+}
+
+func (a *Array) Remove(index int) error <span class="cov8" title="1">{
+        if index &lt; 0 || index &gt;= a.size </span><span class="cov8" title="1">{
+                return fmt.Errorf("index out of range")
+        }</span>
+        
+        <span class="cov8" title="1">for i := index; i &lt; a.size-1; i++ </span><span class="cov8" title="1">{
+                a.data[i] = a.data[i+1]
+        }</span>
+        <span class="cov8" title="1">a.size--
+        return nil</span>
+}
+
+func (a *Array) Get(index int) (string, error) <span class="cov8" title="1">{
+        if index &lt; 0 || index &gt;= a.size </span><span class="cov8" title="1">{
+                return "", fmt.Errorf("index out of range")
+        }</span>
+        <span class="cov8" title="1">return a.data[index], nil</span>
+}
+
+func (a *Array) Set(index int, value string) error <span class="cov8" title="1">{
+        if index &lt; 0 || index &gt;= a.size </span><span class="cov8" title="1">{
+                return fmt.Errorf("index out of range")
+        }</span>
+        <span class="cov8" title="1">a.data[index] = value
+        return nil</span>
+}
+
+func (a *Array) Size() int <span class="cov8" title="1">{
+        return a.size
+}</span>
+
+func (a *Array) IsEmpty() bool <span class="cov8" title="1">{
+        return a.size == 0
+}</span>
+
+func (a *Array) ToJSON() ([]byte, error) <span class="cov8" title="1">{
+        elements := make([]string, a.size)
+        copy(elements, a.data[:a.size])
+        return json.Marshal(elements)
+}</span>
+
+func (a *Array) FromJSON(data []byte) error <span class="cov8" title="1">{
+        var elements []string
+        if err := json.Unmarshal(data, &amp;elements); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">a.size = 0
+        for _, element := range elements </span><span class="cov8" title="1">{
+                if a.size &lt; a.capacity </span><span class="cov8" title="1">{
+                        a.data[a.size] = element
+                        a.size++
+                }</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (a *Array) SaveBinary(writer io.Writer) error <span class="cov8" title="1">{
+        if err := binary.Write(writer, binary.LittleEndian, int32(a.size)); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">for i := 0; i &lt; a.size; i++ </span><span class="cov8" title="1">{
+                length := int32(len(a.data[i]))
+                if err := binary.Write(writer, binary.LittleEndian, length); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">if _, err := writer.Write([]byte(a.data[i])); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (a *Array) LoadBinary(reader io.Reader) error <span class="cov8" title="1">{
+        var size int32
+        if err := binary.Read(reader, binary.LittleEndian, &amp;size); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">a.size = 0
+        for i := 0; i &lt; int(size) &amp;&amp; i &lt; a.capacity; i++ </span><span class="cov8" title="1">{
+                var length int32
+                if err := binary.Read(reader, binary.LittleEndian, &amp;length); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                
+                <span class="cov8" title="1">data := make([]byte, length)
+                if _, err := reader.Read(data); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                
+                <span class="cov8" title="1">a.data[a.size] = string(data)
+                a.size++</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (a *Array) SaveText(writer io.Writer) error <span class="cov8" title="1">{
+        w := bufio.NewWriter(writer)
+        defer w.Flush()
+        
+        if _, err := w.WriteString(strconv.Itoa(a.size) + "\n"); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">for i := 0; i &lt; a.size; i++ </span><span class="cov8" title="1">{
+                if _, err := w.WriteString(a.data[i] + "\n"); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (a *Array) LoadText(reader io.Reader) error <span class="cov8" title="1">{
+        scanner := bufio.NewScanner(reader)
+        
+        if !scanner.Scan() </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to read size")
+        }</span>
+        
+        <span class="cov8" title="1">size, err := strconv.Atoi(strings.TrimSpace(scanner.Text()))
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">a.size = 0
+        for i := 0; i &lt; size &amp;&amp; i &lt; a.capacity; i++ </span><span class="cov8" title="1">{
+                if !scanner.Scan() </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to read element %d", i)
+                }</span>
+                <span class="cov8" title="1">a.data[a.size] = strings.TrimSpace(scanner.Text())
+                a.size++</span>
+        }
+        
+        <span class="cov8" title="1">return scanner.Err()</span>
+}
+
+func (a *Array) Print() <span class="cov8" title="1">{
+        fmt.Print("Array: ")
+        for i := 0; i &lt; a.size; i++ </span><span class="cov8" title="1">{
+                fmt.Print(a.data[i] + " ")
+        }</span>
+        <span class="cov8" title="1">fmt.Println()</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package main
+
+import (
+        "encoding/json"
+        "fmt"
+        "os"
+        "strconv"
+        "strings"
+)
+
+type HashNode struct {
+        Key   string `json:"key"`
+        Value string `json:"value"`
+}
+
+type ChainHashTable struct {
+        buckets [][]HashNode `json:"buckets"`
+        size    int          `json:"size"`
+}
+
+func NewChainHashTable(capacity int) *ChainHashTable <span class="cov8" title="1">{
+        if capacity &lt;= 0 </span><span class="cov8" title="1">{
+                capacity = 16
+        }</span>
+        <span class="cov8" title="1">return &amp;ChainHashTable{
+                buckets: make([][]HashNode, capacity),
+                size:    0,
+        }</span>
+}
+
+func (ht *ChainHashTable) hash(key string) int <span class="cov8" title="1">{
+        if len(ht.buckets) == 0 </span><span class="cov0" title="0">{
+                return 0
+        }</span>
+        <span class="cov8" title="1">hash := 0
+        for _, char := range key </span><span class="cov8" title="1">{
+                hash = (hash*31 + int(char)) % len(ht.buckets)
+        }</span>
+        <span class="cov8" title="1">if hash &lt; 0 </span><span class="cov0" title="0">{
+                hash = -hash
+        }</span>
+        <span class="cov8" title="1">return hash</span>
+}
+
+func (ht *ChainHashTable) Insert(key, value string) <span class="cov8" title="1">{
+        index := ht.hash(key)
+        
+        // Check if key already exists
+        for i, node := range ht.buckets[index] </span><span class="cov8" title="1">{
+                if node.Key == key </span><span class="cov8" title="1">{
+                        ht.buckets[index][i].Value = value
+                        return
+                }</span>
+        }
+        
+        // Add new node
+        <span class="cov8" title="1">ht.buckets[index] = append(ht.buckets[index], HashNode{Key: key, Value: value})
+        ht.size++</span>
+}
+
+func (ht *ChainHashTable) Get(key string) (string, bool) <span class="cov8" title="1">{
+        index := ht.hash(key)
+        
+        for _, node := range ht.buckets[index] </span><span class="cov8" title="1">{
+                if node.Key == key </span><span class="cov8" title="1">{
+                        return node.Value, true
+                }</span>
+        }
+        <span class="cov8" title="1">return "", false</span>
+}
+
+func (ht *ChainHashTable) Remove(key string) bool <span class="cov8" title="1">{
+        index := ht.hash(key)
+        
+        for i, node := range ht.buckets[index] </span><span class="cov8" title="1">{
+                if node.Key == key </span><span class="cov8" title="1">{
+                        ht.buckets[index] = append(ht.buckets[index][:i], ht.buckets[index][i+1:]...)
+                        ht.size--
+                        return true
+                }</span>
+        }
+        <span class="cov8" title="1">return false</span>
+}
+
+func (ht *ChainHashTable) Size() int <span class="cov8" title="1">{
+        return ht.size
+}</span>
+
+func (ht *ChainHashTable) IsEmpty() bool <span class="cov8" title="1">{
+        return ht.size == 0
+}</span>
+
+func (ht *ChainHashTable) ToJSON() (string, error) <span class="cov8" title="1">{
+        data, err := json.Marshal(ht)
+        return string(data), err
+}</span>
+
+func (ht *ChainHashTable) FromJSON(jsonStr string) error <span class="cov8" title="1">{
+        err := json.Unmarshal([]byte(jsonStr), ht)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        // Ensure buckets are properly initialized
+        <span class="cov8" title="1">if ht.buckets == nil </span><span class="cov0" title="0">{
+                ht.buckets = make([][]HashNode, 16)
+        }</span>
+        
+        // Initialize nil slices in buckets
+        <span class="cov8" title="1">for i := range ht.buckets </span><span class="cov8" title="1">{
+                if ht.buckets[i] == nil </span><span class="cov8" title="1">{
+                        ht.buckets[i] = []HashNode{}
+                }</span>
+        }
+        
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (ht *ChainHashTable) SaveBinary(filename string) error <span class="cov8" title="1">{
+        jsonStr, err := ht.ToJSON()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return os.WriteFile(filename, []byte(jsonStr), 0644)</span>
+}
+
+func (ht *ChainHashTable) LoadBinary(filename string) error <span class="cov8" title="1">{
+        data, err := os.ReadFile(filename)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return ht.FromJSON(string(data))</span>
+}
+
+func (ht *ChainHashTable) SaveText(filename string) error <span class="cov8" title="1">{
+        file, err := os.Create(filename)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">defer file.Close()
+        
+        fmt.Fprintf(file, "%d\n", len(ht.buckets))
+        fmt.Fprintf(file, "%d\n", ht.size)
+        
+        for _, bucket := range ht.buckets </span><span class="cov8" title="1">{
+                fmt.Fprintf(file, "%d\n", len(bucket))
+                for _, node := range bucket </span><span class="cov8" title="1">{
+                        fmt.Fprintf(file, "%s %s\n", node.Key, node.Value)
+                }</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (ht *ChainHashTable) LoadText(filename string) error <span class="cov8" title="1">{
+        data, err := os.ReadFile(filename)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">lines := strings.Split(strings.TrimSpace(string(data)), "\n")
+        if len(lines) &lt; 2 </span><span class="cov0" title="0">{
+                return fmt.Errorf("invalid file format")
+        }</span>
+        
+        <span class="cov8" title="1">capacity, err := strconv.Atoi(lines[0])
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">size, err := strconv.Atoi(lines[1])
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">ht.buckets = make([][]HashNode, capacity)
+        ht.size = size
+        
+        lineIndex := 2
+        for i := 0; i &lt; capacity &amp;&amp; lineIndex &lt; len(lines); i++ </span><span class="cov8" title="1">{
+                bucketSize, err := strconv.Atoi(lines[lineIndex])
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">lineIndex++
+                
+                for j := 0; j &lt; bucketSize &amp;&amp; lineIndex &lt; len(lines); j++ </span><span class="cov8" title="1">{
+                        parts := strings.SplitN(lines[lineIndex], " ", 2)
+                        if len(parts) == 2 </span><span class="cov8" title="1">{
+                                ht.buckets[i] = append(ht.buckets[i], HashNode{Key: parts[0], Value: parts[1]})
+                        }</span>
+                        <span class="cov8" title="1">lineIndex++</span>
+                }
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (ht *ChainHashTable) Print() <span class="cov8" title="1">{
+        for _, bucket := range ht.buckets </span><span class="cov8" title="1">{
+                for _, node := range bucket </span><span class="cov8" title="1">{
+                        fmt.Printf("%s:%s ", node.Key, node.Value)
+                }</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package main
+
+import (
+        "encoding/json"
+        "fmt"
+)
+
+type ForwardNode struct {
+        data string
+        next *ForwardNode
+}
+
+type ForwardList struct {
+        head *ForwardNode
+        size int
+}
+
+func NewForwardList() *ForwardList <span class="cov8" title="1">{
+        return &amp;ForwardList{
+                head: nil,
+                size: 0,
+        }
+}</span>
+
+func (l *ForwardList) PushFront(value string) <span class="cov8" title="1">{
+        newNode := &amp;ForwardNode{
+                data: value,
+                next: l.head,
+        }
+        l.head = newNode
+        l.size++
+}</span>
+
+func (l *ForwardList) PopFront() (string, bool) <span class="cov8" title="1">{
+        if l.head == nil </span><span class="cov8" title="1">{
+                return "", false
+        }</span>
+        <span class="cov8" title="1">value := l.head.data
+        l.head = l.head.next
+        l.size--
+        return value, true</span>
+}
+
+func (l *ForwardList) Get(index int) (string, error) <span class="cov8" title="1">{
+        if index &lt; 0 || index &gt;= l.size </span><span class="cov8" title="1">{
+                return "", fmt.Errorf("index out of range")
+        }</span>
+        
+        <span class="cov8" title="1">current := l.head
+        for i := 0; i &lt; index; i++ </span><span class="cov0" title="0">{
+                current = current.next
+        }</span>
+        <span class="cov8" title="1">return current.data, nil</span>
+}
+
+func (l *ForwardList) Size() int <span class="cov8" title="1">{
+        return l.size
+}</span>
+
+func (l *ForwardList) IsEmpty() bool <span class="cov8" title="1">{
+        return l.head == nil
+}</span>
+
+func (l *ForwardList) ToJSON() ([]byte, error) <span class="cov8" title="1">{
+        var elements []string
+        current := l.head
+        for current != nil </span><span class="cov8" title="1">{
+                elements = append(elements, current.data)
+                current = current.next
+        }</span>
+        <span class="cov8" title="1">return json.Marshal(elements)</span>
+}
+
+func (l *ForwardList) FromJSON(data []byte) error <span class="cov8" title="1">{
+        var elements []string
+        if err := json.Unmarshal(data, &amp;elements); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">l.head = nil
+        l.size = 0
+        
+        for i := len(elements) - 1; i &gt;= 0; i-- </span><span class="cov8" title="1">{
+                l.PushFront(elements[i])
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (l *ForwardList) Print() <span class="cov8" title="1">{
+        fmt.Print("ForwardList: ")
+        current := l.head
+        for current != nil </span><span class="cov8" title="1">{
+                fmt.Print(current.data + " ")
+                current = current.next
+        }</span>
+        <span class="cov8" title="1">fmt.Println()</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package main
+
+import "fmt"
+
+func main() <span class="cov0" title="0">{
+        fmt.Println("=== Демонстрация структур данных Go ===")
+        
+        // Stack
+        fmt.Println("\n--- Stack ---")
+        stack := NewStack()
+        stack.Push("первый")
+        stack.Push("второй")
+        stack.Print()
+        
+        // RedBlackTree
+        fmt.Println("\n--- RedBlackTree ---")
+        tree := NewRedBlackTree()
+        tree.Insert("zebra")
+        tree.Insert("apple")
+        tree.Insert("banana")
+        tree.Print()
+        
+        // ChainHashTable
+        fmt.Println("\n--- ChainHashTable ---")
+        ht := NewChainHashTable(8)
+        ht.Insert("ключ1", "значение1")
+        ht.Insert("ключ2", "значение2")
+        ht.Print()
+        
+        fmt.Println("\n=== Все работает! ===")
+}</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package main
+
+import (
+        "bufio"
+        "encoding/binary"
+        "encoding/json"
+        "fmt"
+        "io"
+        "strconv"
+        "strings"
+)
+
+type QueueNode struct {
+        data string
+        next *QueueNode
+}
+
+type Queue struct {
+        front *QueueNode
+        rear  *QueueNode
+        size  int
+}
+
+func NewQueue() *Queue <span class="cov8" title="1">{
+        return &amp;Queue{
+                front: nil,
+                rear:  nil,
+                size:  0,
+        }
+}</span>
+
+func (q *Queue) Enqueue(value string) <span class="cov8" title="1">{
+        newNode := &amp;QueueNode{
+                data: value,
+                next: nil,
+        }
+        
+        if q.rear != nil </span><span class="cov8" title="1">{
+                q.rear.next = newNode
+        }</span> else<span class="cov8" title="1"> {
+                q.front = newNode
+        }</span>
+        <span class="cov8" title="1">q.rear = newNode
+        q.size++</span>
+}
+
+func (q *Queue) Dequeue() (string, bool) <span class="cov8" title="1">{
+        if q.front == nil </span><span class="cov8" title="1">{
+                return "", false
+        }</span>
+        
+        <span class="cov8" title="1">value := q.front.data
+        q.front = q.front.next
+        if q.front == nil </span><span class="cov8" title="1">{
+                q.rear = nil
+        }</span>
+        <span class="cov8" title="1">q.size--
+        return value, true</span>
+}
+
+func (q *Queue) Front() (string, bool) <span class="cov8" title="1">{
+        if q.front == nil </span><span class="cov8" title="1">{
+                return "", false
+        }</span>
+        <span class="cov8" title="1">return q.front.data, true</span>
+}
+
+func (q *Queue) IsEmpty() bool <span class="cov8" title="1">{
+        return q.front == nil
+}</span>
+
+func (q *Queue) Size() int <span class="cov8" title="1">{
+        return q.size
+}</span>
+
+func (q *Queue) ToJSON() ([]byte, error) <span class="cov8" title="1">{
+        var elements []string
+        current := q.front
+        for current != nil </span><span class="cov8" title="1">{
+                elements = append(elements, current.data)
+                current = current.next
+        }</span>
+        <span class="cov8" title="1">return json.Marshal(elements)</span>
+}
+
+func (q *Queue) FromJSON(data []byte) error <span class="cov8" title="1">{
+        var elements []string
+        if err := json.Unmarshal(data, &amp;elements); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">q.front = nil
+        q.rear = nil
+        q.size = 0
+        
+        for _, element := range elements </span><span class="cov8" title="1">{
+                q.Enqueue(element)
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (q *Queue) SaveBinary(writer io.Writer) error <span class="cov8" title="1">{
+        if err := binary.Write(writer, binary.LittleEndian, int32(q.size)); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">current := q.front
+        for current != nil </span><span class="cov8" title="1">{
+                length := int32(len(current.data))
+                if err := binary.Write(writer, binary.LittleEndian, length); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">if _, err := writer.Write([]byte(current.data)); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">current = current.next</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (q *Queue) LoadBinary(reader io.Reader) error <span class="cov8" title="1">{
+        var size int32
+        if err := binary.Read(reader, binary.LittleEndian, &amp;size); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">q.front = nil
+        q.rear = nil
+        q.size = 0
+        
+        for i := 0; i &lt; int(size); i++ </span><span class="cov8" title="1">{
+                var length int32
+                if err := binary.Read(reader, binary.LittleEndian, &amp;length); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                
+                <span class="cov8" title="1">data := make([]byte, length)
+                if _, err := reader.Read(data); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                
+                <span class="cov8" title="1">q.Enqueue(string(data))</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (q *Queue) SaveText(writer io.Writer) error <span class="cov8" title="1">{
+        w := bufio.NewWriter(writer)
+        defer w.Flush()
+        
+        if _, err := w.WriteString(strconv.Itoa(q.size) + "\n"); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">current := q.front
+        for current != nil </span><span class="cov8" title="1">{
+                if _, err := w.WriteString(current.data + "\n"); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">current = current.next</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (q *Queue) LoadText(reader io.Reader) error <span class="cov8" title="1">{
+        scanner := bufio.NewScanner(reader)
+        
+        if !scanner.Scan() </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to read size")
+        }</span>
+        
+        <span class="cov8" title="1">size, err := strconv.Atoi(strings.TrimSpace(scanner.Text()))
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">q.front = nil
+        q.rear = nil
+        q.size = 0
+        
+        for i := 0; i &lt; size; i++ </span><span class="cov8" title="1">{
+                if !scanner.Scan() </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to read element %d", i)
+                }</span>
+                <span class="cov8" title="1">q.Enqueue(strings.TrimSpace(scanner.Text()))</span>
+        }
+        
+        <span class="cov8" title="1">return scanner.Err()</span>
+}
+
+func (q *Queue) Print() <span class="cov8" title="1">{
+        fmt.Print("Queue: ")
+        current := q.front
+        for current != nil </span><span class="cov8" title="1">{
+                fmt.Print(current.data + " ")
+                current = current.next
+        }</span>
+        <span class="cov8" title="1">fmt.Println()</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package main
+
+import (
+        "bufio"
+        "encoding/binary"
+        "encoding/json"
+        "fmt"
+        "io"
+        "strconv"
+        "strings"
+)
+
+type Color bool
+
+const (
+        RED   Color = false
+        BLACK Color = true
+)
+
+type TreeNode struct {
+        data   string
+        color  Color
+        left   *TreeNode
+        right  *TreeNode
+        parent *TreeNode
+}
+
+type RedBlackTree struct {
+        root *TreeNode
+        nil  *TreeNode
+}
+
+func NewRedBlackTree() *RedBlackTree <span class="cov8" title="1">{
+        nilNode := &amp;TreeNode{color: BLACK}
+        return &amp;RedBlackTree{
+                root: nilNode,
+                nil:  nilNode,
+        }
+}</span>
+
+func (t *RedBlackTree) leftRotate(x *TreeNode) <span class="cov8" title="1">{
+        y := x.right
+        x.right = y.left
+        if y.left != t.nil </span><span class="cov0" title="0">{
+                y.left.parent = x
+        }</span>
+        <span class="cov8" title="1">y.parent = x.parent
+        if x.parent == t.nil </span><span class="cov8" title="1">{
+                t.root = y
+        }</span> else<span class="cov8" title="1"> if x == x.parent.left </span><span class="cov8" title="1">{
+                x.parent.left = y
+        }</span> else<span class="cov8" title="1"> {
+                x.parent.right = y
+        }</span>
+        <span class="cov8" title="1">y.left = x
+        x.parent = y</span>
+}
+
+func (t *RedBlackTree) rightRotate(x *TreeNode) <span class="cov8" title="1">{
+        y := x.left
+        x.left = y.right
+        if y.right != t.nil </span><span class="cov0" title="0">{
+                y.right.parent = x
+        }</span>
+        <span class="cov8" title="1">y.parent = x.parent
+        if x.parent == t.nil </span><span class="cov8" title="1">{
+                t.root = y
+        }</span> else<span class="cov8" title="1"> if x == x.parent.right </span><span class="cov8" title="1">{
+                x.parent.right = y
+        }</span> else<span class="cov0" title="0"> {
+                x.parent.left = y
+        }</span>
+        <span class="cov8" title="1">y.right = x
+        x.parent = y</span>
+}
+
+func (t *RedBlackTree) Insert(data string) <span class="cov8" title="1">{
+        z := &amp;TreeNode{
+                data:   data,
+                color:  RED,
+                left:   t.nil,
+                right:  t.nil,
+                parent: t.nil,
+        }
+        
+        y := t.nil
+        x := t.root
+        
+        for x != t.nil </span><span class="cov8" title="1">{
+                y = x
+                if z.data &lt; x.data </span><span class="cov8" title="1">{
+                        x = x.left
+                }</span> else<span class="cov8" title="1"> {
+                        x = x.right
+                }</span>
+        }
+        
+        <span class="cov8" title="1">z.parent = y
+        if y == t.nil </span><span class="cov8" title="1">{
+                t.root = z
+        }</span> else<span class="cov8" title="1"> if z.data &lt; y.data </span><span class="cov8" title="1">{
+                y.left = z
+        }</span> else<span class="cov8" title="1"> {
+                y.right = z
+        }</span>
+        
+        <span class="cov8" title="1">t.insertFixup(z)</span>
+}
+
+func (t *RedBlackTree) insertFixup(z *TreeNode) <span class="cov8" title="1">{
+        for z.parent.color == RED </span><span class="cov8" title="1">{
+                if z.parent == z.parent.parent.left </span><span class="cov8" title="1">{
+                        y := z.parent.parent.right
+                        if y.color == RED </span><span class="cov8" title="1">{
+                                z.parent.color = BLACK
+                                y.color = BLACK
+                                z.parent.parent.color = RED
+                                z = z.parent.parent
+                        }</span> else<span class="cov8" title="1"> {
+                                if z == z.parent.right </span><span class="cov8" title="1">{
+                                        z = z.parent
+                                        t.leftRotate(z)
+                                }</span>
+                                <span class="cov8" title="1">z.parent.color = BLACK
+                                z.parent.parent.color = RED
+                                t.rightRotate(z.parent.parent)</span>
+                        }
+                } else<span class="cov8" title="1"> {
+                        y := z.parent.parent.left
+                        if y.color == RED </span><span class="cov8" title="1">{
+                                z.parent.color = BLACK
+                                y.color = BLACK
+                                z.parent.parent.color = RED
+                                z = z.parent.parent
+                        }</span> else<span class="cov8" title="1"> {
+                                if z == z.parent.left </span><span class="cov8" title="1">{
+                                        z = z.parent
+                                        t.rightRotate(z)
+                                }</span>
+                                <span class="cov8" title="1">z.parent.color = BLACK
+                                z.parent.parent.color = RED
+                                t.leftRotate(z.parent.parent)</span>
+                        }
+                }
+        }
+        <span class="cov8" title="1">t.root.color = BLACK</span>
+}
+
+func (t *RedBlackTree) Search(data string) bool <span class="cov8" title="1">{
+        x := t.root
+        for x != t.nil &amp;&amp; data != x.data </span><span class="cov8" title="1">{
+                if data &lt; x.data </span><span class="cov8" title="1">{
+                        x = x.left
+                }</span> else<span class="cov8" title="1"> {
+                        x = x.right
+                }</span>
+        }
+        <span class="cov8" title="1">return x != t.nil</span>
+}
+
+func (t *RedBlackTree) IsEmpty() bool <span class="cov8" title="1">{
+        return t.root == t.nil
+}</span>
+
+func (t *RedBlackTree) inorderTraversal(node *TreeNode, result *[]string) <span class="cov8" title="1">{
+        if node != t.nil </span><span class="cov8" title="1">{
+                t.inorderTraversal(node.left, result)
+                *result = append(*result, node.data)
+                t.inorderTraversal(node.right, result)
+        }</span>
+}
+
+func (t *RedBlackTree) ToJSON() ([]byte, error) <span class="cov8" title="1">{
+        var result []string
+        t.inorderTraversal(t.root, &amp;result)
+        return json.Marshal(result)
+}</span>
+
+func (t *RedBlackTree) FromJSON(data []byte) error <span class="cov8" title="1">{
+        var elements []string
+        if err := json.Unmarshal(data, &amp;elements); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">t.root = t.nil
+        
+        for _, element := range elements </span><span class="cov8" title="1">{
+                t.Insert(element)
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (t *RedBlackTree) SaveBinary(writer io.Writer) error <span class="cov8" title="1">{
+        var result []string
+        t.inorderTraversal(t.root, &amp;result)
+        
+        if err := binary.Write(writer, binary.LittleEndian, int32(len(result))); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">for _, element := range result </span><span class="cov8" title="1">{
+                length := int32(len(element))
+                if err := binary.Write(writer, binary.LittleEndian, length); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">if _, err := writer.Write([]byte(element)); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (t *RedBlackTree) LoadBinary(reader io.Reader) error <span class="cov8" title="1">{
+        var size int32
+        if err := binary.Read(reader, binary.LittleEndian, &amp;size); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">t.root = t.nil
+        
+        for i := 0; i &lt; int(size); i++ </span><span class="cov8" title="1">{
+                var length int32
+                if err := binary.Read(reader, binary.LittleEndian, &amp;length); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                
+                <span class="cov8" title="1">data := make([]byte, length)
+                if _, err := reader.Read(data); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                
+                <span class="cov8" title="1">t.Insert(string(data))</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (t *RedBlackTree) SaveText(writer io.Writer) error <span class="cov8" title="1">{
+        var result []string
+        t.inorderTraversal(t.root, &amp;result)
+        
+        w := bufio.NewWriter(writer)
+        defer w.Flush()
+        
+        if _, err := w.WriteString(strconv.Itoa(len(result)) + "\n"); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">for _, element := range result </span><span class="cov8" title="1">{
+                if _, err := w.WriteString(element + "\n"); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (t *RedBlackTree) LoadText(reader io.Reader) error <span class="cov8" title="1">{
+        scanner := bufio.NewScanner(reader)
+        
+        if !scanner.Scan() </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to read size")
+        }</span>
+        
+        <span class="cov8" title="1">size, err := strconv.Atoi(strings.TrimSpace(scanner.Text()))
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">t.root = t.nil
+        
+        for i := 0; i &lt; size; i++ </span><span class="cov8" title="1">{
+                if !scanner.Scan() </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to read element %d", i)
+                }</span>
+                <span class="cov8" title="1">t.Insert(strings.TrimSpace(scanner.Text()))</span>
+        }
+        
+        <span class="cov8" title="1">return scanner.Err()</span>
+}
+
+func (t *RedBlackTree) Print() <span class="cov8" title="1">{
+        var result []string
+        t.inorderTraversal(t.root, &amp;result)
+        
+        fmt.Print("RedBlackTree: ")
+        for _, element := range result </span><span class="cov8" title="1">{
+                fmt.Print(element + " ")
+        }</span>
+        <span class="cov8" title="1">fmt.Println()</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package main
+
+import (
+        "bufio"
+        "encoding/binary"
+        "encoding/json"
+        "fmt"
+        "io"
+        "strconv"
+        "strings"
+)
+
+type StackNode struct {
+        data string
+        next *StackNode
+}
+
+type Stack struct {
+        top  *StackNode
+        size int
+}
+
+func NewStack() *Stack <span class="cov8" title="1">{
+        return &amp;Stack{
+                top:  nil,
+                size: 0,
+        }
+}</span>
+
+func (s *Stack) Push(value string) <span class="cov8" title="1">{
+        newNode := &amp;StackNode{
+                data: value,
+                next: s.top,
+        }
+        s.top = newNode
+        s.size++
+}</span>
+
+func (s *Stack) Pop() (string, bool) <span class="cov8" title="1">{
+        if s.top == nil </span><span class="cov8" title="1">{
+                return "", false
+        }</span>
+        <span class="cov8" title="1">value := s.top.data
+        s.top = s.top.next
+        s.size--
+        return value, true</span>
+}
+
+func (s *Stack) Top() (string, bool) <span class="cov8" title="1">{
+        if s.top == nil </span><span class="cov8" title="1">{
+                return "", false
+        }</span>
+        <span class="cov8" title="1">return s.top.data, true</span>
+}
+
+func (s *Stack) IsEmpty() bool <span class="cov8" title="1">{
+        return s.top == nil
+}</span>
+
+func (s *Stack) Size() int <span class="cov8" title="1">{
+        return s.size
+}</span>
+
+func (s *Stack) Contains(value string) bool <span class="cov8" title="1">{
+        current := s.top
+        for current != nil </span><span class="cov8" title="1">{
+                if current.data == value </span><span class="cov8" title="1">{
+                        return true
+                }</span>
+                <span class="cov8" title="1">current = current.next</span>
+        }
+        <span class="cov8" title="1">return false</span>
+}
+
+func (s *Stack) ToJSON() ([]byte, error) <span class="cov8" title="1">{
+        var elements []string
+        current := s.top
+        for current != nil </span><span class="cov8" title="1">{
+                elements = append([]string{current.data}, elements...)
+                current = current.next
+        }</span>
+        <span class="cov8" title="1">return json.Marshal(elements)</span>
+}
+
+func (s *Stack) FromJSON(data []byte) error <span class="cov8" title="1">{
+        var elements []string
+        if err := json.Unmarshal(data, &amp;elements); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">s.top = nil
+        s.size = 0
+        
+        for _, element := range elements </span><span class="cov8" title="1">{
+                s.Push(element)
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (s *Stack) SaveBinary(writer io.Writer) error <span class="cov8" title="1">{
+        if err := binary.Write(writer, binary.LittleEndian, int32(s.size)); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">var elements []string
+        current := s.top
+        for current != nil </span><span class="cov8" title="1">{
+                elements = append([]string{current.data}, elements...)
+                current = current.next
+        }</span>
+        
+        <span class="cov8" title="1">for _, element := range elements </span><span class="cov8" title="1">{
+                length := int32(len(element))
+                if err := binary.Write(writer, binary.LittleEndian, length); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">if _, err := writer.Write([]byte(element)); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (s *Stack) LoadBinary(reader io.Reader) error <span class="cov8" title="1">{
+        var size int32
+        if err := binary.Read(reader, binary.LittleEndian, &amp;size); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">s.top = nil
+        s.size = 0
+        
+        for i := 0; i &lt; int(size); i++ </span><span class="cov8" title="1">{
+                var length int32
+                if err := binary.Read(reader, binary.LittleEndian, &amp;length); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                
+                <span class="cov8" title="1">data := make([]byte, length)
+                if _, err := reader.Read(data); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                
+                <span class="cov8" title="1">s.Push(string(data))</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (s *Stack) SaveText(writer io.Writer) error <span class="cov8" title="1">{
+        w := bufio.NewWriter(writer)
+        defer w.Flush()
+        
+        if _, err := w.WriteString(strconv.Itoa(s.size) + "\n"); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">var elements []string
+        current := s.top
+        for current != nil </span><span class="cov8" title="1">{
+                elements = append([]string{current.data}, elements...)
+                current = current.next
+        }</span>
+        
+        <span class="cov8" title="1">for _, element := range elements </span><span class="cov8" title="1">{
+                if _, err := w.WriteString(element + "\n"); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (s *Stack) LoadText(reader io.Reader) error <span class="cov8" title="1">{
+        scanner := bufio.NewScanner(reader)
+        
+        if !scanner.Scan() </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to read size")
+        }</span>
+        
+        <span class="cov8" title="1">size, err := strconv.Atoi(strings.TrimSpace(scanner.Text()))
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        
+        <span class="cov8" title="1">s.top = nil
+        s.size = 0
+        
+        for i := 0; i &lt; size; i++ </span><span class="cov8" title="1">{
+                if !scanner.Scan() </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to read element %d", i)
+                }</span>
+                <span class="cov8" title="1">s.Push(strings.TrimSpace(scanner.Text()))</span>
+        }
+        
+        <span class="cov8" title="1">return scanner.Err()</span>
+}
+
+func (s *Stack) Print() <span class="cov8" title="1">{
+        fmt.Print("Stack: ")
+        current := s.top
+        for current != nil </span><span class="cov8" title="1">{
+                fmt.Print(current.data + " ")
+                current = current.next
+        }</span>
+        <span class="cov8" title="1">fmt.Println()</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
