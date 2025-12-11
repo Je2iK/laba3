@@ -1,6 +1,7 @@
 // RedBlackTree - Self-balancing binary search tree (replaces AVL)
 #pragma once
 #include <string>
+#include "nlohmann/json.hpp"
 
 enum Color { RED, BLACK };
 
@@ -30,11 +31,11 @@ public:
     bool search(const std::string& value) const;
     void remove(const std::string& value);
     bool isEmpty() const;
-    std::string toJSON() const;
-    void fromJSON(const std::string& json);
-    void saveBinary(const std::string& filename) const;
-    void loadBinary(const std::string& filename);
-    void saveText(const std::string& filename) const;
-    void loadText(const std::string& filename);
+    nlohmann::json serialize() const;
+    void deserialize(const nlohmann::json& json);
+    void serializeBinary(std::ostream& os) const;
+    void deserializeBinary(std::istream& is);
+    void serializeText(std::ostream& os) const;
+    void deserializeText(std::istream& is);
     void print() const;
 };

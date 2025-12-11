@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "nlohmann/json.hpp"
 
 struct QueueNode {
     std::string data;
@@ -9,7 +10,7 @@ struct QueueNode {
 
 class Queue {
 private:
-    QueueNode* front;
+    QueueNode* frontNode;
     QueueNode* rear;
     int count;
 
@@ -19,15 +20,17 @@ public:
     
     void enqueue(const std::string& value);
     std::string dequeue();
+    std::string front() const;
     std::string getFront() const;
+    bool empty() const;
     bool isEmpty() const;
     int size() const;
     
-    std::string toJSON() const;
-    void fromJSON(const std::string& json);
-    void saveBinary(const std::string& filename) const;
-    void loadBinary(const std::string& filename);
-    void saveText(const std::string& filename) const;
-    void loadText(const std::string& filename);
+    nlohmann::json serialize() const;
+    void deserialize(const nlohmann::json& json);
+    void serializeBinary(std::ostream& os) const;
+    void deserializeBinary(std::istream& is);
+    void serializeText(std::ostream& os) const;
+    void deserializeText(std::istream& is);
     void print() const;
 };

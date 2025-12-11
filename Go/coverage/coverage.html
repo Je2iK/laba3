@@ -61,13 +61,11 @@
 				
 				<option value="file2">datastructures/forward_list.go (94.7%)</option>
 				
-				<option value="file3">datastructures/main.go (0.0%)</option>
+				<option value="file3">datastructures/queue.go (86.8%)</option>
 				
-				<option value="file4">datastructures/queue.go (86.8%)</option>
+				<option value="file4">datastructures/red_black_tree.go (89.4%)</option>
 				
-				<option value="file5">datastructures/red_black_tree.go (89.4%)</option>
-				
-				<option value="file6">datastructures/stack.go (87.4%)</option>
+				<option value="file5">datastructures/stack.go (87.4%)</option>
 				
 				</select>
 			</div>
@@ -317,10 +315,10 @@ func (ht *ChainHashTable) hash(key string) int <span class="cov8" title="1">{
         <span class="cov8" title="1">return hash</span>
 }
 
+// Вставляет пару ключ-значение
 func (ht *ChainHashTable) Insert(key, value string) <span class="cov8" title="1">{
         index := ht.hash(key)
         
-        // Check if key already exists
         for i, node := range ht.buckets[index] </span><span class="cov8" title="1">{
                 if node.Key == key </span><span class="cov8" title="1">{
                         ht.buckets[index][i].Value = value
@@ -328,11 +326,11 @@ func (ht *ChainHashTable) Insert(key, value string) <span class="cov8" title="1"
                 }</span>
         }
         
-        // Add new node
         <span class="cov8" title="1">ht.buckets[index] = append(ht.buckets[index], HashNode{Key: key, Value: value})
         ht.size++</span>
 }
 
+// Получает значение по ключу
 func (ht *ChainHashTable) Get(key string) (string, bool) <span class="cov8" title="1">{
         index := ht.hash(key)
         
@@ -344,6 +342,7 @@ func (ht *ChainHashTable) Get(key string) (string, bool) <span class="cov8" titl
         <span class="cov8" title="1">return "", false</span>
 }
 
+// Удаляет элемент по ключу
 func (ht *ChainHashTable) Remove(key string) bool <span class="cov8" title="1">{
         index := ht.hash(key)
         
@@ -376,12 +375,10 @@ func (ht *ChainHashTable) FromJSON(jsonStr string) error <span class="cov8" titl
                 return err
         }</span>
         
-        // Ensure buckets are properly initialized
         <span class="cov8" title="1">if ht.buckets == nil </span><span class="cov0" title="0">{
                 ht.buckets = make([][]HashNode, 16)
         }</span>
         
-        // Initialize nil slices in buckets
         <span class="cov8" title="1">for i := range ht.buckets </span><span class="cov8" title="1">{
                 if ht.buckets[i] == nil </span><span class="cov8" title="1">{
                         ht.buckets[i] = []HashNode{}
@@ -578,39 +575,6 @@ func (l *ForwardList) Print() <span class="cov8" title="1">{
 </pre>
 		
 		<pre class="file" id="file3" style="display: none">package main
-
-import "fmt"
-
-func main() <span class="cov0" title="0">{
-        fmt.Println("=== Демонстрация структур данных Go ===")
-        
-        // Stack
-        fmt.Println("\n--- Stack ---")
-        stack := NewStack()
-        stack.Push("первый")
-        stack.Push("второй")
-        stack.Print()
-        
-        // RedBlackTree
-        fmt.Println("\n--- RedBlackTree ---")
-        tree := NewRedBlackTree()
-        tree.Insert("zebra")
-        tree.Insert("apple")
-        tree.Insert("banana")
-        tree.Print()
-        
-        // ChainHashTable
-        fmt.Println("\n--- ChainHashTable ---")
-        ht := NewChainHashTable(8)
-        ht.Insert("ключ1", "значение1")
-        ht.Insert("ключ2", "значение2")
-        ht.Print()
-        
-        fmt.Println("\n=== Все работает! ===")
-}</span>
-</pre>
-		
-		<pre class="file" id="file4" style="display: none">package main
 
 import (
         "bufio"
@@ -811,7 +775,7 @@ func (q *Queue) Print() <span class="cov8" title="1">{
 }
 </pre>
 		
-		<pre class="file" id="file5" style="display: none">package main
+		<pre class="file" id="file4" style="display: none">package main
 
 import (
         "bufio"
@@ -1102,7 +1066,7 @@ func (t *RedBlackTree) Print() <span class="cov8" title="1">{
 }
 </pre>
 		
-		<pre class="file" id="file6" style="display: none">package main
+		<pre class="file" id="file5" style="display: none">package main
 
 import (
         "bufio"
@@ -1131,6 +1095,7 @@ func NewStack() *Stack <span class="cov8" title="1">{
         }
 }</span>
 
+// Добавляет элемент в стек
 func (s *Stack) Push(value string) <span class="cov8" title="1">{
         newNode := &amp;StackNode{
                 data: value,
@@ -1140,6 +1105,7 @@ func (s *Stack) Push(value string) <span class="cov8" title="1">{
         s.size++
 }</span>
 
+// Удаляет и возвращает верхний элемент
 func (s *Stack) Pop() (string, bool) <span class="cov8" title="1">{
         if s.top == nil </span><span class="cov8" title="1">{
                 return "", false
@@ -1176,6 +1142,7 @@ func (s *Stack) Contains(value string) bool <span class="cov8" title="1">{
         <span class="cov8" title="1">return false</span>
 }
 
+// Сериализация в JSON
 func (s *Stack) ToJSON() ([]byte, error) <span class="cov8" title="1">{
         var elements []string
         current := s.top
@@ -1186,6 +1153,7 @@ func (s *Stack) ToJSON() ([]byte, error) <span class="cov8" title="1">{
         <span class="cov8" title="1">return json.Marshal(elements)</span>
 }
 
+// Десериализация из JSON
 func (s *Stack) FromJSON(data []byte) error <span class="cov8" title="1">{
         var elements []string
         if err := json.Unmarshal(data, &amp;elements); err != nil </span><span class="cov0" title="0">{

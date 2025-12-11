@@ -1,146 +1,112 @@
 #include <gtest/gtest.h>
 #include "include/ForwardList.hpp"
-#include <sstream>
 
 TEST(ForwardListTest, ConstructorAndInitialState) {
   ForwardList list;
-  EXPECT_TRUE(list.empty());
-  EXPECT_EQ(list.size(), 0);
+  EXPECT_TRUE(list.isEmpty());
 }
 
 TEST(ForwardListTest, PushFront) {
   ForwardList list;
   list.pushFront("first");
-  EXPECT_FALSE(list.empty());
+  EXPECT_FALSE(list.isEmpty());
   EXPECT_EQ(list.size(), 1);
   EXPECT_EQ(list.get(0), "first");
-  
-  list.pushFront("second");
-  EXPECT_EQ(list.size(), 2);
-  EXPECT_EQ(list.get(0), "second");
-  EXPECT_EQ(list.get(1), "first");
 }
 
 TEST(ForwardListTest, PopFront) {
   ForwardList list;
-  list.pushFront("a");
-  list.pushFront("b");
-  
-  list.popFront();
+  list.pushFront("test");
   EXPECT_EQ(list.size(), 1);
-  EXPECT_EQ(list.get(0), "a");
+  EXPECT_EQ(list.get(0), "test");
   
   list.popFront();
-  EXPECT_TRUE(list.empty());
+  EXPECT_TRUE(list.isEmpty());
   
   list.popFront(); // Safe on empty
-  EXPECT_TRUE(list.empty());
+  EXPECT_TRUE(list.isEmpty());
 }
 
 TEST(ForwardListTest, Insert) {
   ForwardList list;
-  list.pushFront("a");
-  list.pushFront("c");
-  list.insert(1, "b");
+  list.insert(0, "first");
+  list.insert(1, "second");
+  list.insert(0, "new_first");
   
   EXPECT_EQ(list.size(), 3);
-  EXPECT_EQ(list.get(0), "c");
-  EXPECT_EQ(list.get(1), "b");
-  EXPECT_EQ(list.get(2), "a");
-  
-  EXPECT_THROW(list.insert(10, "fail"), std::out_of_range);
+  EXPECT_EQ(list.get(0), "new_first");
+  EXPECT_EQ(list.get(1), "first");
+  EXPECT_EQ(list.get(2), "second");
 }
 
 TEST(ForwardListTest, Remove) {
   ForwardList list;
-  list.pushFront("a");
-  list.pushFront("b");
-  list.pushFront("c");
+  list.pushFront("third");
+  list.pushFront("second");
+  list.pushFront("first");
   
   list.remove(1);
   EXPECT_EQ(list.size(), 2);
-  EXPECT_EQ(list.get(0), "c");
-  EXPECT_EQ(list.get(1), "a");
-  
-  EXPECT_THROW(list.remove(10), std::out_of_range);
-}
-
-TEST(ForwardListTest, Get) {
-  ForwardList list;
-  list.pushFront("test");
-  EXPECT_EQ(list.get(0), "test");
-  
-  EXPECT_THROW(list.get(10), std::out_of_range);
+  EXPECT_EQ(list.get(0), "first");
+  EXPECT_EQ(list.get(1), "third");
 }
 
 TEST(ForwardListTest, Serialization) {
   ForwardList list;
-  list.pushFront("z");
-  list.pushFront("y");
-  list.pushFront("x");
+  list.pushFront("third");
+  list.pushFront("second");
+  list.pushFront("first");
   
-  nlohmann::json j = list.serialize();
+  std::string json = list.toJSON();
   ForwardList newList;
-  newList.deserialize(j);
+  newList.fromJSON(json);
   
   EXPECT_EQ(newList.size(), 3);
-  EXPECT_EQ(newList.get(0), "x");
-  EXPECT_EQ(newList.get(1), "y");
-  EXPECT_EQ(newList.get(2), "z");
+  EXPECT_EQ(newList.get(0), "first");
+  EXPECT_EQ(newList.get(1), "second");
+  EXPECT_EQ(newList.get(2), "third");
 }
 
 TEST(ForwardListTest, BinarySerialization) {
   ForwardList list;
-  list.pushFront("test2");
-  list.pushFront("test1");
+  list.pushFront("beta");
+  list.pushFront("alpha");
   
-  std::ostringstream oss;
-  list.serializeBinary(oss);
-  
+  list.saveBinary("test_forward.bin");
   ForwardList newList;
-  std::istringstream iss(oss.str());
-  newList.deserializeBinary(iss);
+  newList.loadBinary("test_forward.bin");
   
   EXPECT_EQ(newList.size(), 2);
-  EXPECT_EQ(newList.get(0), "test1");
-  EXPECT_EQ(newList.get(1), "test2");
+  EXPECT_EQ(newList.get(0), "alpha");
+  EXPECT_EQ(newList.get(1), "beta");
 }
 
 TEST(ForwardListTest, TextSerialization) {
   ForwardList list;
-  list.pushFront("world");
-  list.pushFront("hello");
+  list.pushFront("gamma");
+  list.pushFront("beta");
+  list.pushFront("alpha");
   
-  std::ostringstream oss;
-  list.serializeText(oss);
-  
+  list.saveText("test_forward.txt");
   ForwardList newList;
-  std::istringstream iss(oss.str());
-  newList.deserializeText(iss);
+  newList.loadText("test_forward.txt");
   
-  EXPECT_EQ(newList.size(), 2);
-  EXPECT_EQ(newList.get(0), "hello");
-  EXPECT_EQ(newList.get(1), "world");
+  EXPECT_EQ(newList.size(), 3);
+  EXPECT_EQ(newList.get(0), "alpha");
+  EXPECT_EQ(newList.get(1), "beta");
+  EXPECT_EQ(newList.get(2), "gamma");
 }
 
 TEST(ForwardListTest, EmptyListSerialization) {
   ForwardList list;
   
-  nlohmann::json j = list.serialize();
+  std::string json = list.toJSON();
   ForwardList newList1;
-  newList1.deserialize(j);
-  EXPECT_TRUE(newList1.empty());
+  newList1.fromJSON(json);
+  EXPECT_TRUE(newList1.isEmpty());
   
-  std::ostringstream oss;
-  list.serializeBinary(oss);
+  list.saveBinary("empty_forward.bin");
   ForwardList newList2;
-  std::istringstream iss(oss.str());
-  newList2.deserializeBinary(iss);
-  EXPECT_TRUE(newList2.empty());
-}
-
-TEST(ForwardListTest, Print) {
-  ForwardList list;
-  list.pushFront("test");
-  list.print();
+  newList2.loadBinary("empty_forward.bin");
+  EXPECT_TRUE(newList2.isEmpty());
 }

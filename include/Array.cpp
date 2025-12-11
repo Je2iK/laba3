@@ -1,113 +1,85 @@
 #include "Array.hpp"
 #include <iostream>
-#include <fstream>
-#include "nlohmann/json.hpp"
+#include <sstream>
 
-using json = nlohmann::json;
-
-Array::Array(int cap) : capacity(cap) {
-    data.reserve(cap);
-}
+Array::Array(int cap) : capacity(cap) { data.reserve(cap); }
 
 void Array::insert(int index, const std::string& value) {
-    if (index < 0 || index > (int)data.size()) {
-        throw std::out_of_range("Index out of range");
-    }
+    if (index < 0 || index > (int)data.size()) throw std::out_of_range("Index out of range");
     data.insert(data.begin() + index, value);
 }
 
 void Array::remove(int index) {
-    if (index < 0 || index >= (int)data.size()) {
-        throw std::out_of_range("Index out of range");
-    }
+    if (index < 0 || index >= (int)data.size()) throw std::out_of_range("Index out of range");
     data.erase(data.begin() + index);
 }
 
 std::string Array::get(int index) const {
-    if (index < 0 || index >= (int)data.size()) {
-        throw std::out_of_range("Index out of range");
-    }
+    if (index < 0 || index >= (int)data.size()) throw std::out_of_range("Index out of range");
     return data[index];
 }
 
 void Array::set(int index, const std::string& value) {
-    if (index < 0 || index >= (int)data.size()) {
-        throw std::out_of_range("Index out of range");
-    }
+    if (index < 0 || index >= (int)data.size()) throw std::out_of_range("Index out of range");
     data[index] = value;
 }
 
-int Array::size() const {
-    return data.size();
-}
+int Array::size() const { return data.size(); }
+bool Array::empty() const { return data.empty(); }
+bool Array::isEmpty() const { return empty(); }
 
-bool Array::isEmpty() const {
-    return data.empty();
-}
-
-std::string Array::toJSON() const {
-    json j;
+nlohmann::json Array::serialize() const {
+    nlohmann::json j;
     j["capacity"] = capacity;
     j["elements"] = data;
-    return j.dump();
+    return j;
 }
 
-void Array::fromJSON(const std::string& jsonStr) {
-    json j = json::parse(jsonStr);
+void Array::deserialize(const nlohmann::json& j) {
     capacity = j["capacity"];
     data = j["elements"].get<std::vector<std::string>>();
 }
 
-void Array::saveBinary(const std::string& filename) const {
-    std::ofstream file(filename, std::ios::binary);
+void Array::serializeBinary(std::ostream& os) const {
     int size = data.size();
-    file.write(reinterpret_cast<const char*>(&size), sizeof(size));
+    os.write(reinterpret_cast<const char*>(&size), sizeof(size));
     for (const auto& item : data) {
         size_t len = item.length();
-        file.write(reinterpret_cast<const char*>(&len), sizeof(len));
-        file.write(item.c_str(), len);
+        os.write(reinterpret_cast<const char*>(&len), sizeof(len));
+        os.write(item.c_str(), len);
     }
-    file.close();
 }
 
-void Array::loadBinary(const std::string& filename) {
+void Array::deserializeBinary(std::istream& is) {
     data.clear();
-    std::ifstream file(filename, std::ios::binary);
     int size;
-    file.read(reinterpret_cast<char*>(&size), sizeof(size));
-    
+    is.read(reinterpret_cast<char*>(&size), sizeof(size));
     for (int i = 0; i < size; i++) {
         size_t len;
-        file.read(reinterpret_cast<char*>(&len), sizeof(len));
+        is.read(reinterpret_cast<char*>(&len), sizeof(len));
         std::string item(len, '\0');
-        file.read(&item[0], len);
+        is.read(&item[0], len);
         data.push_back(item);
     }
-    file.close();
 }
 
-void Array::saveText(const std::string& filename) const {
-    std::ofstream file(filename);
-    file << data.size() << std::endl;
+void Array::serializeText(std::ostream& os) const {
+    os << data.size() << std::endl;
     for (const auto& item : data) {
-        file << item << std::endl;
+        os << item << std::endl;
     }
-    file.close();
 }
 
-void Array::loadText(const std::string& filename) {
+void Array::deserializeText(std::istream& is) {
     data.clear();
-    std::ifstream file(filename);
     int size;
-    file >> size;
-    file.ignore();
-    
+    is >> size;
+    is.ignore();
     for (int i = 0; i < size; i++) {
         std::string item;
-        std::getline(file, item);
+        std::getline(is, item);
         data.push_back(item);
     }
-    file.close();
 }
 
 void Array::print() const {

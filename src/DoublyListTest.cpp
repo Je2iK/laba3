@@ -4,7 +4,7 @@
 
 TEST(DoublyListTest, ConstructorAndInitialState) {
   DoublyList list;
-  EXPECT_TRUE(list.empty());
+  EXPECT_TRUE(list.isEmpty());
   EXPECT_EQ(list.size(), 0);
 }
 
@@ -35,11 +35,11 @@ TEST(DoublyListTest, PopFrontBack) {
   EXPECT_EQ(list.get(0), "b");
   
   list.popBack();
-  EXPECT_TRUE(list.empty());
+  EXPECT_TRUE(list.isEmpty());
   
   list.popFront(); // Safe on empty
   list.popBack(); // Safe on empty
-  EXPECT_TRUE(list.empty());
+  EXPECT_TRUE(list.isEmpty());
 }
 
 TEST(DoublyListTest, Insert) {
@@ -147,14 +147,14 @@ TEST(DoublyListTest, EmptyListSerialization) {
   nlohmann::json j = list.serialize();
   DoublyList newList1;
   newList1.deserialize(j);
-  EXPECT_TRUE(newList1.empty());
+  EXPECT_TRUE(newList1.isEmpty());
   
   std::ostringstream oss;
   list.serializeBinary(oss);
   DoublyList newList2;
   std::istringstream iss(oss.str());
   newList2.deserializeBinary(iss);
-  EXPECT_TRUE(newList2.empty());
+  EXPECT_TRUE(newList2.isEmpty());
 }
 
 TEST(DoublyListTest, Print) {

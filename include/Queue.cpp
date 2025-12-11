@@ -1,22 +1,20 @@
 #include "Queue.hpp"
 #include <iostream>
-#include <fstream>
-#include "nlohmann/json.hpp"
+#include <sstream>
 
-using json = nlohmann::json;
-
-Queue::Queue() : front(nullptr), rear(nullptr), count(0) {}
+Queue::Queue() : frontNode(nullptr), rear(nullptr), count(0) {}
 
 Queue::~Queue() {
-    while (!isEmpty()) {
+    while (!empty()) {
         dequeue();
     }
 }
 
+// Добавляет элемент в очередь
 void Queue::enqueue(const std::string& value) {
     QueueNode* newNode = new QueueNode(value);
-    if (isEmpty()) {
-        front = rear = newNode;
+    if (empty()) {
+        frontNode = rear = newNode;
     } else {
         rear->next = newNode;
         rear = newNode;
@@ -24,16 +22,17 @@ void Queue::enqueue(const std::string& value) {
     count++;
 }
 
+// Удаляет и возвращает первый элемент
 std::string Queue::dequeue() {
-    if (isEmpty()) {
+    if (empty()) {
         throw std::runtime_error("Queue is empty");
     }
     
-    QueueNode* temp = front;
+    QueueNode* temp = frontNode;
     std::string value = temp->data;
-    front = front->next;
+    frontNode = frontNode->next;
     
-    if (front == nullptr) {
+    if (frontNode == nullptr) {
         rear = nullptr;
     }
     
@@ -42,115 +41,116 @@ std::string Queue::dequeue() {
     return value;
 }
 
-std::string Queue::getFront() const {
-    if (isEmpty()) {
+std::string Queue::front() const {
+    if (empty()) {
         throw std::runtime_error("Queue is empty");
     }
-    return front->data;
+    return frontNode->data;
+}
+
+std::string Queue::getFront() const {
+    return front();
+}
+
+bool Queue::empty() const {
+    return frontNode == nullptr;
 }
 
 bool Queue::isEmpty() const {
-    return front == nullptr;
+    return empty();
 }
 
 int Queue::size() const {
     return count;
 }
 
-std::string Queue::toJSON() const {
-    json j;
+// Сериализация в JSON
+nlohmann::json Queue::serialize() const {
+    nlohmann::json j;
     j["size"] = count;
-    j["elements"] = json::array();
+    j["elements"] = nlohmann::json::array();
     
-    QueueNode* current = front;
+    QueueNode* current = frontNode;
     while (current != nullptr) {
         j["elements"].push_back(current->data);
         current = current->next;
     }
     
-    return j.dump();
+    return j;
 }
 
-void Queue::fromJSON(const std::string& jsonStr) {
-    while (!isEmpty()) {
+// Десериализация из JSON
+void Queue::deserialize(const nlohmann::json& j) {
+    while (!empty()) {
         dequeue();
     }
     
-    json j = json::parse(jsonStr);
     auto elements = j["elements"];
-    
     for (const auto& element : elements) {
         enqueue(element.get<std::string>());
     }
 }
 
-void Queue::saveBinary(const std::string& filename) const {
-    std::ofstream file(filename, std::ios::binary);
-    file.write(reinterpret_cast<const char*>(&count), sizeof(count));
+void Queue::serializeBinary(std::ostream& os) const {
+    os.write(reinterpret_cast<const char*>(&count), sizeof(count));
     
-    QueueNode* current = front;
+    QueueNode* current = frontNode;
     while (current != nullptr) {
         size_t len = current->data.length();
-        file.write(reinterpret_cast<const char*>(&len), sizeof(len));
-        file.write(current->data.c_str(), len);
+        os.write(reinterpret_cast<const char*>(&len), sizeof(len));
+        os.write(current->data.c_str(), len);
         current = current->next;
     }
-    file.close();
 }
 
-void Queue::loadBinary(const std::string& filename) {
-    while (!isEmpty()) {
+void Queue::deserializeBinary(std::istream& is) {
+    while (!empty()) {
         dequeue();
     }
     
-    std::ifstream file(filename, std::ios::binary);
     int size;
-    file.read(reinterpret_cast<char*>(&size), sizeof(size));
+    is.read(reinterpret_cast<char*>(&size), sizeof(size));
     
     for (int i = 0; i < size; i++) {
         size_t len;
-        file.read(reinterpret_cast<char*>(&len), sizeof(len));
+        is.read(reinterpret_cast<char*>(&len), sizeof(len));
         
         std::string element(len, '\0');
-        file.read(&element[0], len);
+        is.read(&element[0], len);
         enqueue(element);
     }
-    file.close();
 }
 
-void Queue::saveText(const std::string& filename) const {
-    std::ofstream file(filename);
-    file << count << std::endl;
+void Queue::serializeText(std::ostream& os) const {
+    os << count << std::endl;
     
-    QueueNode* current = front;
+    QueueNode* current = frontNode;
     while (current != nullptr) {
-        file << current->data << std::endl;
+        os << current->data << std::endl;
         current = current->next;
     }
-    file.close();
 }
 
-void Queue::loadText(const std::string& filename) {
-    while (!isEmpty()) {
+void Queue::deserializeText(std::istream& is) {
+    while (!empty()) {
         dequeue();
     }
     
-    std::ifstream file(filename);
     int size;
-    file >> size;
-    file.ignore();
+    is >> size;
+    is.ignore();
     
     for (int i = 0; i < size; i++) {
         std::string element;
-        std::getline(file, element);
+        std::getline(is, element);
         enqueue(element);
     }
-    file.close();
 }
 
+// Выводит содержимое очереди
 void Queue::print() const {
     std::cout << "Queue: ";
-    QueueNode* current = front;
+    QueueNode* current = frontNode;
     while (current != nullptr) {
         std::cout << current->data << " ";
         current = current->next;

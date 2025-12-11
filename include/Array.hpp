@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "nlohmann/json.hpp"
 
 class Array {
 private:
@@ -14,12 +15,13 @@ public:
     std::string get(int index) const;
     void set(int index, const std::string& value);
     int size() const;
+    bool empty() const;
     bool isEmpty() const;
-    std::string toJSON() const;
-    void fromJSON(const std::string& json);
-    void saveBinary(const std::string& filename) const;
-    void loadBinary(const std::string& filename);
-    void saveText(const std::string& filename) const;
-    void loadText(const std::string& filename);
+    nlohmann::json serialize() const;
+    void deserialize(const nlohmann::json& json);
+    void serializeBinary(std::ostream& os) const;
+    void deserializeBinary(std::istream& is);
+    void serializeText(std::ostream& os) const;
+    void deserializeText(std::istream& is);
     void print() const;
 };
